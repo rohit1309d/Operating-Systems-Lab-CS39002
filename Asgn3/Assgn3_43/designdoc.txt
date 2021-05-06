@@ -1,0 +1,99 @@
+		        +--------------------+
+			|       CS39002      |
+			| PROJECT 1: THREADS |
+			|   DESIGN DOCUMENT  |
+			+--------------------+
+				   
+---- GROUP 43 ----
+
+>> Fill in the names and email addresses of your group members.
+
+ Rohit Dhaipule rohit1045d@gmail.com
+ Pruthvi Kantevari pruthvikantevari@gmail.com
+
+
+---- PRELIMINARIES ----
+>> replace "shutdown.c","timer.c" with our files in pintos/src/devices. 
+>> replace "thread.c","thread.h" with our files in pintos/src/threads.
+
+>> go to pintos/src/utils and type command "make" 
+>> then go to pintos/src/threads and type command "make"
+>> now go to pintos/src/threads/build and run "make check" here
+   we can see the following test cases are passed.
+   1. alarm-single
+   2. alarm-multiple
+   3. alarm-simultanious
+   4. alarm-zero
+   5. alarm-negative
+     
+
+			     ALARM CLOCK
+			     ===========
+
+---- DATA STRUCTURES ----
+
+>> list elem_blocked: a list added in thread.c to store all the blocked threads
+>> int64_t wakeup_time : an attribute added in struct thread in thread.h,it stores wake up time of each thread 
+
+>> three functions have been in thread.c
+   bool compare_time - to compare wakeup times of threads
+   void thread_sleep - sets the wakeup time of the thread and adds it to elem_blocked and afterwards blocks it.
+   void thread_wakeup - wakes up threads whose wakeup  time is least and less than current time
+
+---- ALGORITHMS ----
+
+>> A2: Briefly describe what happens in a call to timer_sleep(),
+>> including the effects of the timer interrupt handler.
+  when this function is called, it calls another function thread_sleep() which takes (start_ticks + ticks) as argument.
+
+  when we call thread_sleep() with ticks as argument,
+    it disables the interrupt,
+    sets  wakeup time = ticks,
+    also adds the thread to the elem_blocked which is added in a sorted way according to their wakeup time,
+    blocks the current thread and sets interrupt to old state.
+
+  when we call timer_interrupt() it calls thread_wakeup()
+  
+  when thread_wakeup() is called:
+    interrupt is disabled,
+    loop the elem_blocked while it is not empty,
+    if the head's wakeup time is more than current time break out of loop 
+    else remove the head of elem_blocked from it and unblock it.
+
+
+  The following line of code is added as qemu is no longer supporting the power off sequence on the port 0x8900
+
+	//...
+	serial_flush ();
+	outw (0xB004, 0x2000);  // <-- Add this line
+	//...
+
+
+>> A3: What steps are taken to minimize the amount of time spent in
+>> the timer interrupt handler?
+
+  In order to decrease the amount of time spent in timer interrupt handler, We added threads that needs to sleep and changed their current state to blocked and schedule another thread. 
+  when we call timer interrupt function it checks whether the head of elem_blocked needs to be unblocked(ie wakeup up) or not.
+
+---- SYNCHRONIZATION ----
+
+>> A4: How are race conditions avoided when multiple threads call
+>> timer_sleep() simultaneously?
+   
+   timer_sleep() calls thread_sleep()
+   here we disable interrupt before we add a thread to elem_blocked
+
+
+>> A5: How are race conditions avoided when a timer interrupt occurs
+>> during a call to timer_sleep()?
+    interrupts are disabled when we call timer_sleep() and at the end of timer_sleep() we enable interrupts, so time interrupts occur while executing timer_sleep().
+   
+
+---- RATIONALE ----
+
+>> A6: Why did you choose this design?  In what ways is it superior to
+>> another design you considered?
+   we choose this design as keeping elem_blocked list in a sorted way reduces time complexivity, 
+   here we delete n threads in O(n) but if we keep the list unsorted it takes O(n^2) as we have to select the thread with least wakeup time each time.
+
+

@@ -1,0 +1,88 @@
+			+--------------------+
+			|        CS39002     |
+			| PROJECT 1: THREADS |
+			|   DESIGN DOCUMENT  |
+			+--------------------+
+				   
+---- GROUP 43----
+
+>> Fill in the names and email addresses of your group members.
+
+Rohit Dhaipule rohit1045d@gmail.com
+Pruthvi Kantevari pruthvikantevari@gmail.com
+
+---- PRELIMINARIES ----
+
+>> If you have any preliminary comments on your submission, notes for the
+>> TAs, or extra credit, please give them here.
+
+>> replace "timer.c","timer.h" with our files in pintos/src/devices. 
+>> replace "thread.c","thread.h","fixed-point.h" with our files in pintos/src/threads.
+
+>> go to pintos/src/utils and type command "make" 
+>> then go to pintos/src/threads and type command "make"
+>> now go to pintos/src/threads/build and run "make check" here
+
+
+			  ADVANCED SCHEDULER
+			  ==================
+
+---- DATA STRUCTURES ----
+
+>> int nice : An attribute added in struct thread in thread.h. It is an integer value that determines how "nice" the thread should be to other threads.
+>> int recent_cpu: An attribute added in struct thread in thread.h. It stores for how much time the thread had run in CPU
+>> int pre_comp_priority : An attribute added in struct thread in thread.h. It stores the initial priority value which is PRI_MAX - 2*nice. 
+
+
+---- ALGORITHMS ----
+
+>> C2: Suppose threads A, B, and C have nice values 0, 1, and 2.  Each
+>> has a recent_cpu value of 0.  Fill in the table below showing the
+>> scheduling decision and the priority and recent_cpu values for each
+>> thread after each given number of timer ticks:
+
+timer  recent_cpu    priority   thread
+ticks   A   B   C   A   B   C   to run
+-----  --  --  --  --  --  --   ------
+ 0      0   0   0  63  61  59     A
+ 4      4   0   0  62  61  59     A  
+ 8      8   0   0  61  61  59     B
+12      8   4   0  61  60  59     A
+16      12  4   0  60  60  59     B
+20      12  8   0  60  59  59     A
+24      16  8   0  59  59  59     C
+28      16  8   4  59  59  58     B
+32      16  12  4  59  58  58     A
+36      20  12  4  58  58  58     C 
+
+>> C3: Did any ambiguities in the scheduler specification make values
+>> in the table uncertain?  If so, what rule did you use to resolve
+>> them?  Does this match the behavior of your scheduler?
+
+When two threads with the same priority have highest priority then we get an ambiguity of which thread to schedule next.
+In this case, the running thread is pushed back into the ready list and the thread which has the highest priority and appears first in the ready list is scheduled next.
+
+>> C4: How is the way you divided the cost of scheduling between code
+>> inside and outside interrupt context likely to affect performance?
+
+As most of the advance scheduler runs between interrupt disable and interrupt enable, this may decrease the CPU performance. We have optimised the code such that the thread priority of running thread is updated after every 4 ticks and load_avg, recent_cpu, priority are updated after every timer_frequency i.e. 100 ticks.
+
+---- RATIONALE ----
+
+>> C5: Briefly critique your design, pointing out advantages and
+>> disadvantages in your design choices.  If you were to have extra
+>> time to work on this part of the project, how might you choose to
+>> refine or improve your design?
+
+-- The code is not too complex, but simple and time efficient.
+-- Extra space is taken for the variable pre_comp_priority but this helps to make the design time-efficient.
+
+>> C6: The assignment explains arithmetic for fixed-point math in
+>> detail, but it leaves it open to you to implement it.  Why did you
+>> decide to implement it the way you did?  If you created an
+>> abstraction layer for fixed-point math, that is, an abstract data
+>> type and/or a set of functions or macros to manipulate fixed-point
+>> numbers, why did you do so?  If not, why not?
+
+-- The Arithmetic for fixed point math are implemented as macros because they can be easily imported from fixed-point.h to thread.c. We have avoided writing them as functions as we need a .c file and .h file to import them and process is slow.
+

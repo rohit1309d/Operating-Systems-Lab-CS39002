@@ -1,0 +1,13 @@
+#define F (1 << 14)
+
+#define convert_to_fixed_point(x)        ((int) (x * F))
+#define convert_to_int(x)                ((int) (x / F))
+#define convert_to_nearest_int(x)        (x >= 0) ? ((int) (x + (F / 2)) / F) : ((int) (x - (F / 2)) / F)
+#define add_fixed_point(x,y)        ((int) (x + y))
+#define sub_fixed_point(x,y)     ((int) (x - y))
+#define mul_fixed_point(x,y)       ((int) (((int64_t) x) * y / F))
+#define div_fixed_point(x,y)        ((int) (((int64_t) x) * F / y))
+#define add_fixed_point_int(x,y)      ((int) (x + (y * F)))
+#define sub_fixed_point_int(x,y)     ((int) (x - (y * F)))
+#define mul_fixed_point_int(x,y)       ((int) (x * y))
+#define div_fixed_point_int(x,y)       ((int) (x / y))

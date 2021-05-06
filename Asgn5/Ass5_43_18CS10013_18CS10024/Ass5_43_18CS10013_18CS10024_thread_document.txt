@@ -1,0 +1,17 @@
+Data Structures:
+	For processes, we have created a shared memory segment which contains Total jobs, job_created, job_completed, pthread_mutex_t m, buffer(a priority queue), count as it it necessary for the processes to share memory with each other whereas for threads we have declared these variables globally, The threads will share the global variables among them.
+
+
+Functions:
+-> Producer:
+	Each producer process generates a computing job, waits for a random interval of time between 0 and 3 seconds, and inserts the computing job in shared memory queue. After insertion, the producer will repeat the process. It waits if the size of the priority queue is less than the given finite size. 
+	In part 2, we have added a break condition which stops the producer function if job_created = tot_jobs. This is not needed for part 1 as the parent process kills all the processes when job_created = tot_jobs = job_computed.
+
+-> Consumer:
+	Each consumer process waits for a random interval of time between 0 and 3 seconds, extracts the job with highest priority in the shared memory priority queue. Then the consumer will increase the job_completed counter and will sleep for "compute time" seconds. If the priority queue is empty the consumer process will wait till a job is inserted in the buffer. It stops if tot_jobs = job_computed.
+	In part 2, we have added a break condition which stops the producer function if job_completed = tot_jobs. This is not needed for part 1 as the parent process kills all the processes when job_completed = tot_jobs = job_created.
+
+
+Algorithms:
+	For part1, we have created a shared memory to share between the processes.The parent process creates np number of child processes. In each of these child processes we call the producer function. Now the parent process creates nc number of child processes. In each of these child processes we call the consumer function. The parent process waits until job_created = job_completed = tot_jobs. After this all the child processes are terminated and the parent process exits after printing the time taken.
+	But for part 2, global variables are created as they are shared by the threads. The parent process creates np number of threads with producer function as target and nc number of threads with consumer function as target. The main function waits for all the threads to complete running and then destroys them.
